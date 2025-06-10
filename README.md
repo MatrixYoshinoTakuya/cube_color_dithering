@@ -1,6 +1,7 @@
 # cube_color_dithering
 
 画像を指定したカラーパレットでディザリング変換するWebツールです。
+https://matrixyoshinotakuya.github.io/cube_color_dithering/
 
 ## 機能
 - 6色のカラーピッカーで変換に使用する色を選択可能
