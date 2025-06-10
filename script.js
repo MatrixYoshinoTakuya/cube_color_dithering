@@ -8,6 +8,7 @@ const palette = [
 ];
 
 let originalImage = null;
+let cropArea = { x: 0, y: 0, width: 0, height: 0 };
 
 // UI要素の取得
 const uploadArea = document.getElementById('uploadArea');
@@ -48,6 +49,7 @@ fileInput.addEventListener('change', (e) => {
             originalImage.onload = function() {
                 convertBtn.disabled = false;
                 console.log('Image loaded and ready for processing');
+                initializeCropTool();
             };
             originalImage.src = event.target.result;
         };
@@ -99,6 +101,7 @@ function handleDrop(e) {
                 originalImage.onload = function() {
                     convertBtn.disabled = false;
                     console.log('Image loaded and ready for processing');
+                    initializeCropTool();
                 };
                 originalImage.src = event.target.result;
             };
@@ -182,6 +185,83 @@ function distributeError(data, width, height, x, y, error) {
     }
 }
 
+function initializeCropTool() {
+    const cropCanvas = document.createElement('canvas');
+    cropCanvas.id = 'cropCanvas';
+    cropCanvas.width = originalImage.width;
+    cropCanvas.height = originalImage.height;
+    cropCanvas.style.position = 'relative';
+    cropCanvas.style.marginLeft = '20px';
+    cropCanvas.style.border = '2px dashed red';
+    cropCanvas.style.cursor = 'crosshair';
+
+    const cropCtx = cropCanvas.getContext('2d');
+    cropCtx.drawImage(originalImage, 0, 0);
+
+    const cropContainer = document.createElement('div');
+    cropContainer.style.display = 'flex';
+    cropContainer.style.flexDirection = 'column';
+    cropContainer.style.alignItems = 'center';
+
+    const resetButton = document.createElement('button');
+    resetButton.textContent = 'リセット';
+    resetButton.style.marginTop = '10px';
+    resetButton.addEventListener('click', () => {
+        cropArea = { x: 0, y: 0, width: originalImage.width, height: originalImage.height };
+        cropCtx.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
+        cropCtx.drawImage(originalImage, 0, 0);
+        cropCtx.strokeStyle = 'blue';
+        cropCtx.lineWidth = 2;
+        cropCtx.strokeRect(cropArea.x, cropArea.y, cropArea.width, cropArea.height);
+    });
+
+    cropContainer.appendChild(cropCanvas);
+    cropContainer.appendChild(resetButton);
+
+    const uploadArea = document.getElementById('uploadArea');
+    uploadArea.parentNode.insertBefore(cropContainer, uploadArea.nextSibling);
+
+    let isDragging = false;
+
+    cropCanvas.addEventListener('mousedown', (e) => {
+        const rect = cropCanvas.getBoundingClientRect();
+        cropArea.x = e.clientX - rect.left;
+        cropArea.y = e.clientY - rect.top;
+        isDragging = true;
+    });
+
+    cropCanvas.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+            const rect = cropCanvas.getBoundingClientRect();
+            const width = parseInt(document.getElementById('resizeWidth').value, 10);
+            const height = parseInt(document.getElementById('resizeHeight').value, 10);
+            const outputRatio = width / height;
+
+            let newWidth = e.clientX - rect.left - cropArea.x;
+            let newHeight = e.clientY - rect.top - cropArea.y;
+
+            if (newWidth / newHeight > outputRatio) {
+                newWidth = newHeight * outputRatio;
+            } else {
+                newHeight = newWidth / outputRatio;
+            }
+
+            cropArea.width = newWidth;
+            cropArea.height = newHeight;
+
+            cropCtx.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
+            cropCtx.drawImage(originalImage, 0, 0);
+            cropCtx.strokeStyle = 'blue';
+            cropCtx.lineWidth = 2;
+            cropCtx.strokeRect(cropArea.x, cropArea.y, cropArea.width, cropArea.height);
+        }
+    });
+
+    cropCanvas.addEventListener('mouseup', () => {
+        isDragging = false;
+    });
+}
+
 async function convertImage() {
     if (!originalImage) {
         alert('画像が選択されていません。');
@@ -207,6 +287,30 @@ async function convertImage() {
     const width = parseInt(document.getElementById('resizeWidth').value, 10);
     const height = parseInt(document.getElementById('resizeHeight').value, 10);
 
+    // 出力サイズの比率を計算
+    const outputRatio = width / height;
+    const cropRatio = cropArea.width / cropArea.height;
+
+    // 比率を調整
+    if (cropRatio > outputRatio) {
+        const adjustedWidth = cropArea.height * outputRatio;
+        cropArea.x += (cropArea.width - adjustedWidth) / 2;
+        cropArea.width = adjustedWidth;
+    } else if (cropRatio < outputRatio) {
+        const adjustedHeight = cropArea.width / outputRatio;
+        cropArea.y += (cropArea.height - adjustedHeight) / 2;
+        cropArea.height = adjustedHeight;
+    }
+
+    // 選択範囲の表示を更新
+    const cropCanvas = document.getElementById('cropCanvas');
+    const cropCtx = cropCanvas.getContext('2d');
+    cropCtx.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
+    cropCtx.drawImage(originalImage, 0, 0);
+    cropCtx.strokeStyle = 'blue';
+    cropCtx.lineWidth = 2;
+    cropCtx.strokeRect(cropArea.x, cropArea.y, cropArea.width, cropArea.height);
+
     // リサイズ用キャンバスを作成
     const tempCanvas = document.createElement('canvas');
     const tempCtx = tempCanvas.getContext('2d');
@@ -219,7 +323,17 @@ async function convertImage() {
 
     tempCtx.imageSmoothingEnabled = true;
     tempCtx.imageSmoothingQuality = 'high';
-    tempCtx.drawImage(originalImage, 0, 0, width, height);
+    tempCtx.drawImage(
+        originalImage,
+        cropArea.x,
+        cropArea.y,
+        cropArea.width,
+        cropArea.height,
+        0,
+        0,
+        width,
+        height
+    );
 
     progressBar.style.width = '50%';
     await new Promise(resolve => setTimeout(resolve, 100));
