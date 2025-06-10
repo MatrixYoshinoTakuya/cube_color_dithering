@@ -213,6 +213,8 @@ function initializeCropTool() {
         cropCtx.strokeStyle = 'blue';
         cropCtx.lineWidth = 2;
         cropCtx.strokeRect(cropArea.x, cropArea.y, cropArea.width, cropArea.height);
+        
+        updateOriginalImgDisplay();
     });
 
     cropContainer.appendChild(cropCanvas);
@@ -254,12 +256,55 @@ function initializeCropTool() {
             cropCtx.strokeStyle = 'blue';
             cropCtx.lineWidth = 2;
             cropCtx.strokeRect(cropArea.x, cropArea.y, cropArea.width, cropArea.height);
+            
+            updateOriginalImgDisplay();
         }
     });
 
     cropCanvas.addEventListener('mouseup', () => {
         isDragging = false;
     });
+    
+    // Initialize with default crop area
+    cropArea = { x: 0, y: 0, width: originalImage.width, height: originalImage.height };
+    updateOriginalImgDisplay();
+}
+
+function updateOriginalImgDisplay() {
+    const originalImgCtx = originalImg.getContext('2d');
+    const canvasWidth = originalImg.width;
+    const canvasHeight = originalImg.height;
+    
+    // Maintain aspect ratio of the crop area
+    const cropRatio = cropArea.width / cropArea.height;
+    let displayWidth, displayHeight;
+    
+    if (cropRatio > 1) {
+        // Landscape orientation
+        displayWidth = canvasWidth;
+        displayHeight = canvasWidth / cropRatio;
+    } else {
+        // Portrait or square orientation
+        displayHeight = canvasHeight;
+        displayWidth = canvasHeight * cropRatio;
+    }
+    
+    // Center the image in the canvas
+    const offsetX = (canvasWidth - displayWidth) / 2;
+    const offsetY = (canvasHeight - displayHeight) / 2;
+    
+    originalImgCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+    originalImgCtx.drawImage(
+        originalImage, 
+        cropArea.x, 
+        cropArea.y, 
+        cropArea.width, 
+        cropArea.height,
+        offsetX,
+        offsetY,
+        displayWidth,
+        displayHeight
+    );
 }
 
 async function convertImage() {
@@ -268,10 +313,19 @@ async function convertImage() {
         return;
     }
 
+    // ユーザー指定の幅と高さを取得
+    const width = parseInt(document.getElementById('resizeWidth').value, 10);
+    const height = parseInt(document.getElementById('resizeHeight').value, 10);
+
+    // 出力canvasのサイズを指定サイズに合わせる
+    resultCanvas.width = width;
+    resultCanvas.height = height;
+    scaledCanvas.width = width * 10;
+    scaledCanvas.height = height * 10;
+
     // Clear output canvases
     const ctx = resultCanvas.getContext('2d');
     ctx.clearRect(0, 0, resultCanvas.width, resultCanvas.height);
-
     const scaledCtx = scaledCanvas.getContext('2d');
     scaledCtx.clearRect(0, 0, scaledCanvas.width, scaledCanvas.height);
 
@@ -279,13 +333,6 @@ async function convertImage() {
     progress.style.display = 'block';
     progressBar.style.width = '0%';
     convertBtn.disabled = true;
-
-    // 元画像を表示エリアにセット
-    originalImg.src = originalImage.src;
-
-    // ユーザー指定の幅と高さを取得
-    const width = parseInt(document.getElementById('resizeWidth').value, 10);
-    const height = parseInt(document.getElementById('resizeHeight').value, 10);
 
     // 出力サイズの比率を計算
     const outputRatio = width / height;
@@ -310,6 +357,9 @@ async function convertImage() {
     cropCtx.strokeStyle = 'blue';
     cropCtx.lineWidth = 2;
     cropCtx.strokeRect(cropArea.x, cropArea.y, cropArea.width, cropArea.height);
+    
+    // 選択範囲を元画像表示に反映
+    updateOriginalImgDisplay();
 
     // リサイズ用キャンバスを作成
     const tempCanvas = document.createElement('canvas');
