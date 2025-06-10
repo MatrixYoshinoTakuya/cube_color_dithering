@@ -484,12 +484,22 @@ async function convertImage() {
     scaledCtx.setLineDash([]); // 実線
     for (let x = 0; x <= width; x++) {
         scaledCtx.beginPath();
+        if (x % 3 === 0) {
+            scaledCtx.lineWidth = 2; // 3列ごとに太線
+        } else {
+            scaledCtx.lineWidth = 1;
+        }
         scaledCtx.moveTo(x * 10, 0);
         scaledCtx.lineTo(x * 10, height * 10);
         scaledCtx.stroke();
     }
     for (let y = 0; y <= height; y++) {
         scaledCtx.beginPath();
+        if (y % 3 === 0) {
+            scaledCtx.lineWidth = 2; // 3行ごとに太線
+        } else {
+            scaledCtx.lineWidth = 1;
+        }
         scaledCtx.moveTo(0, y * 10);
         scaledCtx.lineTo(width * 10, y * 10);
         scaledCtx.stroke();
@@ -510,10 +520,10 @@ async function convertImage() {
 function downloadImage() {
     const width = document.getElementById('resizeWidth').value;
     const height = document.getElementById('resizeHeight').value;
-    const fileName = `dithered_${width}x${height}`;
+    const fileName = `dithered_${width}x${height}_scaled`;
     const link = document.createElement('a');
     link.download = `${fileName}.png`;
-    link.href = resultCanvas.toDataURL();
+    link.href = scaledCanvas.toDataURL(); // 拡大表示用キャンバスをダウンロード対象に
     link.click();
 }
 
