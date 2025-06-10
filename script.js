@@ -394,9 +394,10 @@ async function convertImage() {
     // 透過部分を白で塗りつぶし、アルファ値を255に
     for (let i = 0; i < imageData.data.length; i += 4) {
         if (imageData.data[i + 3] < 255) {
-            imageData.data[i] = 255;     // R
-            imageData.data[i + 1] = 255; // G
-            imageData.data[i + 2] = 255; // B
+            var alpha = imageData.data[i + 3] / 255; // アルファ値を0-1の範囲に変換;
+            imageData.data[i] = imageData.data[i] * alpha + 255 * (1 - alpha);     // R
+            imageData.data[i + 1] = imageData.data[i + 1] * alpha + 255 * (1 - alpha); // G
+            imageData.data[i + 2] = imageData.data[i + 2] * alpha + 255 * (1 - alpha); // B
             imageData.data[i + 3] = 255; // A
         } else {
             imageData.data[i + 3] = 255; // 強制的に不透明化
