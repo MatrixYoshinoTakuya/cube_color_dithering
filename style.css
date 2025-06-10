@@ -1,3 +1,25 @@
+/*
+    style.css
+
+    This stylesheet provides a modern, glassmorphic-inspired UI for a web application,
+    featuring a centered container with a gradient background, blurred panels, and
+    interactive upload and control areas. Key components include:
+
+    - body: Sets up a responsive, visually appealing background and base typography.
+    - .container: Glassmorphic panel with blur, rounded corners, and shadow.
+    - h1: Large, centered heading with subtle text shadow.
+    - .upload-area: Drag-and-drop file upload area with hover and dragover effects.
+    - input[type="file"]: Hidden file input for custom upload UI.
+    - .controls: Flexbox layout for control buttons, responsive and centered.
+    - button: Gradient-styled, animated buttons with hover and disabled states.
+    - .result-area: Flexbox layout for displaying results side by side or stacked on mobile.
+    - .image-container: Panel for images/canvases with blur and rounded corners.
+    - .color-palette & .color-swatch: Displays a palette of circular color swatches.
+    - .progress & .progress-bar: Animated progress bar for indicating processing status.
+    - Responsive adjustments for mobile screens.
+
+    Designed for clarity, accessibility, and a visually engaging user experience.
+*/
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     max-width: 800px;

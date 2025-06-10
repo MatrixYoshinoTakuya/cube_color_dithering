@@ -185,6 +185,23 @@ function distributeError(data, width, height, x, y, error) {
     }
 }
 
+/**
+ * Initializes the crop tool UI and functionality for cropping an image.
+ * 
+ * - Removes any existing crop canvas and container from the DOM.
+ * - Creates a new crop canvas displaying the original image.
+ * - Adds a reset button to restore the crop area to the full image.
+ * - Handles mouse and touch events for selecting and resizing the crop area,
+ *   maintaining the aspect ratio specified by the resizeWidth and resizeHeight inputs.
+ * - Draws the crop rectangle on the canvas and updates the display accordingly.
+ * 
+ * Assumes the existence of the following global variables and elements:
+ * - `originalImage`: The source image to be cropped (HTMLImageElement).
+ * - `cropArea`: An object representing the crop rectangle ({ x, y, width, height }).
+ * - `updateOriginalImgDisplay()`: A function to update the image display after cropping.
+ * - `resizeWidth`, `resizeHeight`: Input elements specifying the output aspect ratio.
+ * - `uploadArea`: The DOM element after which the crop tool UI is inserted.
+ */
 function initializeCropTool() {
     // 既存の cropCanvas/cropContainer を削除
     const oldCropCanvas = document.getElementById('cropCanvas');
