@@ -222,7 +222,6 @@ function initializeCropTool() {
         cropCtx.strokeStyle = 'blue';
         cropCtx.lineWidth = 2;
         cropCtx.strokeRect(cropArea.x, cropArea.y, cropArea.width, cropArea.height);
-        
         updateOriginalImgDisplay();
     });
 
@@ -234,46 +233,81 @@ function initializeCropTool() {
 
     let isDragging = false;
 
+    // --- マウス操作 ---
     cropCanvas.addEventListener('mousedown', (e) => {
         const rect = cropCanvas.getBoundingClientRect();
         cropArea.x = e.clientX - rect.left;
         cropArea.y = e.clientY - rect.top;
         isDragging = true;
     });
-
     cropCanvas.addEventListener('mousemove', (e) => {
         if (isDragging) {
             const rect = cropCanvas.getBoundingClientRect();
             const width = parseInt(document.getElementById('resizeWidth').value, 10);
             const height = parseInt(document.getElementById('resizeHeight').value, 10);
             const outputRatio = width / height;
-
             let newWidth = e.clientX - rect.left - cropArea.x;
             let newHeight = e.clientY - rect.top - cropArea.y;
-
             if (newWidth / newHeight > outputRatio) {
                 newWidth = newHeight * outputRatio;
             } else {
                 newHeight = newWidth / outputRatio;
             }
-
             cropArea.width = newWidth;
             cropArea.height = newHeight;
-
             cropCtx.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
             cropCtx.drawImage(originalImage, 0, 0);
             cropCtx.strokeStyle = 'blue';
             cropCtx.lineWidth = 2;
             cropCtx.strokeRect(cropArea.x, cropArea.y, cropArea.width, cropArea.height);
-            
             updateOriginalImgDisplay();
         }
     });
-
     cropCanvas.addEventListener('mouseup', () => {
         isDragging = false;
     });
-    
+    cropCanvas.addEventListener('mouseleave', () => {
+        isDragging = false;
+    });
+
+    // --- タッチ操作（スマホ対応）---
+    cropCanvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const rect = cropCanvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        cropArea.x = touch.clientX - rect.left;
+        cropArea.y = touch.clientY - rect.top;
+        isDragging = true;
+    }, { passive: false });
+    cropCanvas.addEventListener('touchmove', (e) => {
+        if (isDragging) {
+            e.preventDefault();
+            const rect = cropCanvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const width = parseInt(document.getElementById('resizeWidth').value, 10);
+            const height = parseInt(document.getElementById('resizeHeight').value, 10);
+            const outputRatio = width / height;
+            let newWidth = touch.clientX - rect.left - cropArea.x;
+            let newHeight = touch.clientY - rect.top - cropArea.y;
+            if (newWidth / newHeight > outputRatio) {
+                newWidth = newHeight * outputRatio;
+            } else {
+                newHeight = newWidth / outputRatio;
+            }
+            cropArea.width = newWidth;
+            cropArea.height = newHeight;
+            cropCtx.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
+            cropCtx.drawImage(originalImage, 0, 0);
+            cropCtx.strokeStyle = 'blue';
+            cropCtx.lineWidth = 2;
+            cropCtx.strokeRect(cropArea.x, cropArea.y, cropArea.width, cropArea.height);
+            updateOriginalImgDisplay();
+        }
+    }, { passive: false });
+    cropCanvas.addEventListener('touchend', (e) => {
+        isDragging = false;
+    });
+
     // Initialize with default crop area
     cropArea = { x: 0, y: 0, width: originalImage.width, height: originalImage.height };
     updateOriginalImgDisplay();
