@@ -480,14 +480,14 @@ async function convertImage() {
 
     // --- ドットの罫線（直線）を描画 ---
     scaledCtx.save();
-    scaledCtx.strokeStyle = 'rgba(0,0,0,0.3)';
-    scaledCtx.setLineDash([]); // 実線
     for (let x = 0; x <= width; x++) {
         scaledCtx.beginPath();
         if (x % 3 === 0) {
-            scaledCtx.lineWidth = 2; // 3列ごとに太線
+            scaledCtx.lineWidth = 4; // さらに太く
+            scaledCtx.strokeStyle = 'rgba(0,0,0,0.8)'; // 濃い色
         } else {
             scaledCtx.lineWidth = 1;
+            scaledCtx.strokeStyle = 'rgba(0,0,0,0.3)';
         }
         scaledCtx.moveTo(x * 10, 0);
         scaledCtx.lineTo(x * 10, height * 10);
@@ -496,9 +496,11 @@ async function convertImage() {
     for (let y = 0; y <= height; y++) {
         scaledCtx.beginPath();
         if (y % 3 === 0) {
-            scaledCtx.lineWidth = 2; // 3行ごとに太線
+            scaledCtx.lineWidth = 4; // さらに太く
+            scaledCtx.strokeStyle = 'rgba(0,0,0,0.8)'; // 濃い色
         } else {
             scaledCtx.lineWidth = 1;
+            scaledCtx.strokeStyle = 'rgba(0,0,0,0.3)';
         }
         scaledCtx.moveTo(0, y * 10);
         scaledCtx.lineTo(width * 10, y * 10);
