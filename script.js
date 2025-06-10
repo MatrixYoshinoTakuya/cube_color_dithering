@@ -230,7 +230,7 @@ function initializeCropTool() {
     cropContainer.style.alignItems = 'center';
 
     const resetButton = document.createElement('button');
-    resetButton.textContent = 'リセット';
+    resetButton.innerHTML = '<span class="lang-ja">リセット</span><span class="lang-en" style="display:none;">Reset</span>';
     resetButton.style.marginTop = '10px';
     resetButton.addEventListener('click', () => {
         cropArea = { x: 0, y: 0, width: originalImage.width, height: originalImage.height };
@@ -516,3 +516,13 @@ function downloadImage() {
     link.href = resultCanvas.toDataURL();
     link.click();
 }
+
+// 言語切り替え機能
+const langSwitchBtn = document.getElementById('langSwitchBtn');
+let currentLang = 'ja';
+langSwitchBtn.addEventListener('click', () => {
+    currentLang = currentLang === 'ja' ? 'en' : 'ja';
+    document.querySelectorAll('.lang-ja').forEach(el => el.style.display = currentLang === 'ja' ? '' : 'none');
+    document.querySelectorAll('.lang-en').forEach(el => el.style.display = currentLang === 'en' ? '' : 'none');
+    langSwitchBtn.textContent = currentLang === 'ja' ? '日本語 / English' : 'English / 日本語';
+});

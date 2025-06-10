@@ -25,52 +25,71 @@
     <script src="script.js" defer></script>
 </head>
 <body>
+    <div style="text-align:right; margin-bottom: 10px;">
+        <button id="langSwitchBtn" class="lang-switch">日本語 / English</button>
+    </div>
     <div class="container">
-        <h1>🎨 画像ディザリング変換</h1>
-        
+        <h1>
+            <span class="lang-ja">🎨 画像ディザリング変換</span>
+            <span class="lang-en" style="display:none;">🎨 Image Dithering Converter</span>
+        </h1>
         <div class="color-palette">
-            <input type="color" class="color-picker" value="#FFFFFF" title="白">
-            <input type="color" class="color-picker" value="#0000FF" title="青">
-            <input type="color" class="color-picker" value="#FF0000" title="赤">
-            <input type="color" class="color-picker" value="#FFA500" title="オレンジ">
-            <input type="color" class="color-picker" value="#FFFF00" title="黄色">
-            <input type="color" class="color-picker" value="#008000" title="緑">
+            <input type="color" class="color-picker" value="#FFFFFF" title="白 White">
+            <input type="color" class="color-picker" value="#0000FF" title="青 Blue">
+            <input type="color" class="color-picker" value="#FF0000" title="赤 Red">
+            <input type="color" class="color-picker" value="#FFA500" title="オレンジ Orange">
+            <input type="color" class="color-picker" value="#FFFF00" title="黄色 Yellow">
+            <input type="color" class="color-picker" value="#008000" title="緑 Green">
         </div>
-        
         <div class="upload-area" id="uploadArea">
-            <div class="upload-text">📁 画像をドラッグ&ドロップ または クリックして選択</div>
-            <div style="font-size: 0.9em; opacity: 0.8;">JPG, PNG, GIF対応</div>
+            <div class="upload-text">
+                <span class="lang-ja">📁 画像をドラッグ&ドロップ または クリックして選択</span>
+                <span class="lang-en" style="display:none;">📁 Drag & drop or click to select an image</span>
+            </div>
+            <div style="font-size: 0.9em; opacity: 0.8;">
+                <span class="lang-ja">JPG, PNG, GIF対応</span> / <span class="lang-en">Supported: JPG, PNG, GIF</span>
+            </div>
             <input type="file" id="fileInput" accept="image/*">
         </div>
-        
         <div class="controls" style="margin-top: 18px;">
-            <button id="convertBtn" disabled>🔄 ディザリング変換</button>
-            <button id="downloadBtn" disabled>💾 変換画像をダウンロード</button>
+            <button id="convertBtn" disabled>
+                <span class="lang-ja">🔄 ディザリング変換</span><span class="lang-en" style="display:none;">🔄 Dither</span>
+            </button>
+            <button id="downloadBtn" disabled>
+                <span class="lang-ja">💾 変換画像をダウンロード</span><span class="lang-en" style="display:none;">💾 Download</span>
+            </button>
         </div>
-
         <div class="resize-controls">
-            <label for="resizeWidth" class="resize-label">幅:</label>
+            <label for="resizeWidth" class="resize-label">
+                <span class="lang-ja">幅:</span><span class="lang-en" style="display:none;">Width:</span>
+            </label>
             <input type="number" id="resizeWidth" class="resize-input" value="30" min="1">
             <span class="resize-x">×</span>
-            <label for="resizeHeight" class="resize-label">高さ:</label>
+            <label for="resizeHeight" class="resize-label">
+                <span class="lang-ja">高さ:</span><span class="lang-en" style="display:none;">Height:</span>
+            </label>
             <input type="number" id="resizeHeight" class="resize-input" value="30" min="1">
         </div>
-        
         <div class="progress" id="progress" style="display: none;">
             <div class="progress-bar" id="progressBar"></div>
         </div>
-        
         <div class="result-area" id="resultArea" style="display: none;">
             <div class="image-container">
-                <h3>元画像</h3>
+                <h3>
+                    <span class="lang-ja">元画像</span><span class="lang-en" style="display:none;">Original</span>
+                </h3>
                 <canvas id="originalImg" width="200" height="200"></canvas>
             </div>
             <div class="image-container">
-                <h3>変換後 (<span id="resizeText">30×30</span>)</h3>
+                <h3>
+                    <span class="lang-ja">変換後 (<span id="resizeText">30×30</span>)</span><span class="lang-en" style="display:none;">Dithered (<span id="resizeTextEn">30×30</span>)</span>
+                </h3>
                 <canvas id="resultCanvas" width="30" height="30"></canvas>
                 <div style="margin-top: 10px;">
                     <canvas id="scaledCanvas" width="300" height="300"></canvas>
-                    <div style="font-size: 0.8em; opacity: 0.8; margin-top: 5px;">表示用拡大版</div>
+                    <div style="font-size: 0.8em; opacity: 0.8; margin-top: 5px;">
+                        <span class="lang-ja">表示用拡大版</span> / <span class="lang-en">Enlarged Preview</span>
+                    </div>
                 </div>
             </div>
         </div>
