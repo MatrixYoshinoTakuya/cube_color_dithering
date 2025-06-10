@@ -27,8 +27,15 @@
         </div>
         
         <div class="controls">
-            <button id="convertBtn" disabled>🔄 30×30にディザリング変換</button>
+            <button id="convertBtn" disabled>🔄 ディザリング変換</button>
             <button id="downloadBtn" disabled>💾 変換画像をダウンロード</button>
+        </div>
+
+        <div class="resize-controls">
+            <label for="resizeWidth">幅:</label>
+            <input type="number" id="resizeWidth" value="30" min="1" style="width: 60px;">
+            <label for="resizeHeight">高さ:</label>
+            <input type="number" id="resizeHeight" value="30" min="1" style="width: 60px;">
         </div>
         
         <div class="progress" id="progress" style="display: none;">
@@ -41,7 +48,7 @@
                 <img id="originalImg" alt="元画像">
             </div>
             <div class="image-container">
-                <h3>変換後 (30×30)</h3>
+                <h3>変換後 (<span id="resizeText">30×30</span>)</h3>
                 <canvas id="resultCanvas" width="30" height="30"></canvas>
                 <div style="margin-top: 10px;">
                     <canvas id="scaledCanvas" width="300" height="300"></canvas>

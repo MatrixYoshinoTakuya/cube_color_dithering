@@ -57,6 +57,15 @@ fileInput.addEventListener('change', (e) => {
 convertBtn.addEventListener('click', convertImage);
 downloadBtn.addEventListener('click', downloadImage);
 
+document.getElementById('resizeWidth').addEventListener('input', updateResizeText);
+document.getElementById('resizeHeight').addEventListener('input', updateResizeText);
+
+function updateResizeText() {
+    const width = document.getElementById('resizeWidth').value;
+    const height = document.getElementById('resizeHeight').value;
+    document.getElementById('resizeText').textContent = `${width}×${height}`;
+}
+
 function handleDragOver(e) {
     e.preventDefault();
     uploadArea.classList.add('dragover');
@@ -179,19 +188,30 @@ async function convertImage() {
         return;
     }
 
+    // Clear output canvases
+    const ctx = resultCanvas.getContext('2d');
+    ctx.clearRect(0, 0, resultCanvas.width, resultCanvas.height);
+
+    const scaledCtx = scaledCanvas.getContext('2d');
+    scaledCtx.clearRect(0, 0, scaledCanvas.width, scaledCanvas.height);
+
     // プログレスバー表示
     progress.style.display = 'block';
     progressBar.style.width = '0%';
     convertBtn.disabled = true;
-    
+
     // 元画像を表示エリアにセット
     originalImg.src = originalImage.src;
-    
-    // 30×30にリサイズ
+
+    // ユーザー指定の幅と高さを取得
+    const width = parseInt(document.getElementById('resizeWidth').value, 10);
+    const height = parseInt(document.getElementById('resizeHeight').value, 10);
+
+    // リサイズ用キャンバスを作成
     const tempCanvas = document.createElement('canvas');
     const tempCtx = tempCanvas.getContext('2d');
-    tempCanvas.width = 30;
-    tempCanvas.height = 30;
+    tempCanvas.width = width;
+    tempCanvas.height = height;
 
     // スムーズなリサイズのため、段階的に縮小
     progressBar.style.width = '25%';
@@ -199,28 +219,26 @@ async function convertImage() {
 
     tempCtx.imageSmoothingEnabled = true;
     tempCtx.imageSmoothingQuality = 'high';
-    tempCtx.drawImage(originalImage, 0, 0, 30, 30);
+    tempCtx.drawImage(originalImage, 0, 0, width, height);
 
     progressBar.style.width = '50%';
     await new Promise(resolve => setTimeout(resolve, 100));
 
     // 画像データを取得
-    const imageData = tempCtx.getImageData(0, 0, 30, 30);
+    const imageData = tempCtx.getImageData(0, 0, width, height);
 
     progressBar.style.width = '75%';
     await new Promise(resolve => setTimeout(resolve, 100));
 
     // ディザリング処理
-    const ditheredData = floydSteinbergDithering(imageData, 30, 30);
+    const ditheredData = floydSteinbergDithering(imageData, width, height);
 
     // 結果をcanvasに描画
-    const ctx = resultCanvas.getContext('2d');
     ctx.putImageData(ditheredData, 0, 0);
 
     // 拡大版も作成（ピクセルアートスタイル）
-    const scaledCtx = scaledCanvas.getContext('2d');
     scaledCtx.imageSmoothingEnabled = false;
-    scaledCtx.drawImage(resultCanvas, 0, 0, 300, 300);
+    scaledCtx.drawImage(resultCanvas, 0, 0, width * 10, height * 10);
 
     progressBar.style.width = '100%';
     await new Promise(resolve => setTimeout(resolve, 300));
@@ -233,8 +251,11 @@ async function convertImage() {
 }
 
 function downloadImage() {
+    const width = document.getElementById('resizeWidth').value;
+    const height = document.getElementById('resizeHeight').value;
+    const fileName = `dithered_${width}x${height}`;
     const link = document.createElement('a');
-    link.download = 'dithered_30x30.png';
+    link.download = `${fileName}.png`;
     link.href = resultCanvas.toDataURL();
     link.click();
 }
