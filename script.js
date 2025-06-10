@@ -186,6 +186,15 @@ function distributeError(data, width, height, x, y, error) {
 }
 
 function initializeCropTool() {
+    // 既存の cropCanvas/cropContainer を削除
+    const oldCropCanvas = document.getElementById('cropCanvas');
+    if (oldCropCanvas) {
+        const oldContainer = oldCropCanvas.parentNode;
+        if (oldContainer && oldContainer.parentNode) {
+            oldContainer.parentNode.removeChild(oldContainer);
+        }
+    }
+
     const cropCanvas = document.createElement('canvas');
     cropCanvas.id = 'cropCanvas';
     cropCanvas.width = originalImage.width;
