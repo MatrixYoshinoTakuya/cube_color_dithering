@@ -28,7 +28,32 @@ uploadArea.addEventListener('drop', handleDrop);
 uploadArea.addEventListener('dragenter', e => e.preventDefault());
 uploadArea.addEventListener('dragleave', handleDragLeave);
 
-fileInput.addEventListener('change', handleFileSelect);
+fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            // Display preview image
+            const previewImage = document.createElement('img');
+            previewImage.src = event.target.result;
+            previewImage.style.maxWidth = '100%';
+            previewImage.style.border = '2px solid rgba(255, 255, 255, 0.3)';
+            previewImage.style.borderRadius = '10px';
+            const uploadArea = document.getElementById('uploadArea');
+            uploadArea.innerHTML = ''; // Clear previous content
+            uploadArea.appendChild(previewImage);
+
+            // Set originalImage and enable the convert button
+            originalImage = new Image();
+            originalImage.onload = function() {
+                convertBtn.disabled = false;
+                console.log('Image loaded and ready for processing');
+            };
+            originalImage.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+});
 convertBtn.addEventListener('click', convertImage);
 downloadBtn.addEventListener('click', downloadImage);
 
@@ -47,35 +72,32 @@ function handleDrop(e) {
     uploadArea.classList.remove('dragover');
     const files = e.dataTransfer.files;
     if (files.length > 0) {
-        handleFile(files[0]);
+        const file = files[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                // Display preview image
+                const previewImage = document.createElement('img');
+                previewImage.src = event.target.result;
+                previewImage.style.maxWidth = '100%';
+                previewImage.style.border = '2px solid rgba(255, 255, 255, 0.3)';
+                previewImage.style.borderRadius = '10px';
+                uploadArea.innerHTML = ''; // Clear previous content
+                uploadArea.appendChild(previewImage);
+                
+                // Set originalImage and enable the convert button
+                originalImage = new Image();
+                originalImage.onload = function() {
+                    convertBtn.disabled = false;
+                    console.log('Image loaded and ready for processing');
+                };
+                originalImage.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            alert('画像ファイルを選択してください');
+        }
     }
-}
-
-function handleFileSelect(e) {
-    const file = e.target.files[0];
-    if (file) {
-        handleFile(file);
-    }
-}
-
-function handleFile(file) {
-    if (!file.type.startsWith('image/')) {
-        alert('画像ファイルを選択してください');
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        originalImage = new Image();
-        originalImage.onload = function() {
-            originalImg.src = e.target.result;
-            convertBtn.disabled = false;
-            resultArea.style.display = 'none';
-            downloadBtn.disabled = true;
-        };
-        originalImage.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
 }
 
 function colorDistance(c1, c2) {
@@ -152,13 +174,19 @@ function distributeError(data, width, height, x, y, error) {
 }
 
 async function convertImage() {
-    if (!originalImage) return;
+    if (!originalImage) {
+        alert('画像が選択されていません。');
+        return;
+    }
 
     // プログレスバー表示
     progress.style.display = 'block';
     progressBar.style.width = '0%';
     convertBtn.disabled = true;
-
+    
+    // 元画像を表示エリアにセット
+    originalImg.src = originalImage.src;
+    
     // 30×30にリサイズ
     const tempCanvas = document.createElement('canvas');
     const tempCtx = tempCanvas.getContext('2d');
