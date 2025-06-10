@@ -391,6 +391,18 @@ async function convertImage() {
     // 画像データを取得
     const imageData = tempCtx.getImageData(0, 0, width, height);
 
+    // 透過部分を白で塗りつぶし、アルファ値を255に
+    for (let i = 0; i < imageData.data.length; i += 4) {
+        if (imageData.data[i + 3] < 255) {
+            imageData.data[i] = 255;     // R
+            imageData.data[i + 1] = 255; // G
+            imageData.data[i + 2] = 255; // B
+            imageData.data[i + 3] = 255; // A
+        } else {
+            imageData.data[i + 3] = 255; // 強制的に不透明化
+        }
+    }
+
     progressBar.style.width = '75%';
     await new Promise(resolve => setTimeout(resolve, 100));
 
