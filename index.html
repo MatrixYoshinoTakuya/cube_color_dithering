@@ -43,16 +43,17 @@
             <input type="file" id="fileInput" accept="image/*">
         </div>
         
-        <div class="controls">
+        <div class="controls" style="margin-top: 18px;">
             <button id="convertBtn" disabled>🔄 ディザリング変換</button>
             <button id="downloadBtn" disabled>💾 変換画像をダウンロード</button>
         </div>
 
         <div class="resize-controls">
-            <label for="resizeWidth">幅:</label>
-            <input type="number" id="resizeWidth" value="30" min="1" style="width: 60px;">
-            <label for="resizeHeight">高さ:</label>
-            <input type="number" id="resizeHeight" value="30" min="1" style="width: 60px;">
+            <label for="resizeWidth" class="resize-label">幅:</label>
+            <input type="number" id="resizeWidth" class="resize-input" value="30" min="1">
+            <span class="resize-x">×</span>
+            <label for="resizeHeight" class="resize-label">高さ:</label>
+            <input type="number" id="resizeHeight" class="resize-input" value="30" min="1">
         </div>
         
         <div class="progress" id="progress" style="display: none;">
