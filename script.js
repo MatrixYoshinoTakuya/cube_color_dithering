@@ -470,21 +470,41 @@ async function convertImage() {
     // ディザリング処理
     const ditheredData = floydSteinbergDithering(imageData, width, height);
 
-    // 結果をcanvasに描画
+    // 結果をresultCanvasに描画
     ctx.putImageData(ditheredData, 0, 0);
 
-    // 拡大版も作成（ピクセルアートスタイル）
+    // 拡大表示用キャンバスに描画
     scaledCtx.imageSmoothingEnabled = false;
-    scaledCtx.drawImage(resultCanvas, 0, 0, width * 10, height * 10);
+    scaledCtx.clearRect(0, 0, scaledCanvas.width, scaledCanvas.height);
+    scaledCtx.drawImage(resultCanvas, 0, 0, width, height, 0, 0, width * 10, height * 10);
+
+    // --- ドットの罫線（直線）を描画 ---
+    scaledCtx.save();
+    scaledCtx.strokeStyle = 'rgba(0,0,0,0.3)';
+    scaledCtx.setLineDash([]); // 実線
+    for (let x = 0; x <= width; x++) {
+        scaledCtx.beginPath();
+        scaledCtx.moveTo(x * 10, 0);
+        scaledCtx.lineTo(x * 10, height * 10);
+        scaledCtx.stroke();
+    }
+    for (let y = 0; y <= height; y++) {
+        scaledCtx.beginPath();
+        scaledCtx.moveTo(0, y * 10);
+        scaledCtx.lineTo(width * 10, y * 10);
+        scaledCtx.stroke();
+    }
+    scaledCtx.restore();
+    // --- ここまで ---
 
     progressBar.style.width = '100%';
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(resolve, 100));
 
-    // UI更新
+    // ダウンロードボタン有効化
+    downloadBtn.disabled = false;
+    convertBtn.disabled = false;
     progress.style.display = 'none';
     resultArea.style.display = 'flex';
-    convertBtn.disabled = false;
-    downloadBtn.disabled = false;
 }
 
 function downloadImage() {
