@@ -1,0 +1,2 @@
+# cube_color_dithering
+キューブの色でディザリングする
