@@ -211,6 +211,50 @@ canvas, img {
     margin: 0 8px;
 }
 
+.white-balance-controls, .contrast-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 10px 20px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+.white-balance-controls label, .contrast-controls label {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #fff;
+    margin-right: 8px;
+    min-width: 110px;
+}
+
+.white-balance-controls input[type="range"], .contrast-controls input[type="range"] {
+    width: 180px;
+    accent-color: #4ECDC4;
+    height: 4px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #FF6B6B, #4ECDC4);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    outline: none;
+    margin: 0 8px;
+    transition: background 0.3s;
+}
+
+.white-balance-controls input[type="range"]:hover, .contrast-controls input[type="range"]:hover {
+    background: linear-gradient(90deg, #4ECDC4, #FF6B6B);
+}
+
+.white-balance-controls span, .contrast-controls span {
+    font-size: 1.05em;
+    color: #fff;
+    min-width: 40px;
+    display: inline-block;
+    text-align: right;
+}
+
 @media (max-width: 600px) {
     .result-area {
         flex-direction: column;

@@ -22,6 +22,23 @@ const resultArea = document.getElementById('resultArea');
 const progress = document.getElementById('progress');
 const progressBar = document.getElementById('progressBar');
 
+// --- White Balance & Contrast UI (single slider each) ---
+const wbAll = document.getElementById('wbAll');
+const wbAllValue = document.getElementById('wbAllValue');
+const contrast = document.getElementById('contrast');
+const contrastValue = document.getElementById('contrastValue');
+function updateWbAllValueDisplay() {
+    wbAllValue.textContent = parseFloat(wbAll.value).toFixed(2);
+}
+function updateContrastValueDisplay() {
+    contrastValue.textContent = parseFloat(contrast.value).toFixed(2);
+}
+wbAll.addEventListener('input', () => { updateWbAllValueDisplay(); updateOriginalImgDisplay(); });
+contrast.addEventListener('input', () => { updateContrastValueDisplay(); updateOriginalImgDisplay(); });
+updateWbAllValueDisplay();
+updateContrastValueDisplay();
+// --- End White Balance & Contrast UI ---
+
 // イベントリスナーの設定
 uploadArea.addEventListener('click', () => fileInput.click());
 uploadArea.addEventListener('dragover', handleDragOver);
@@ -330,41 +347,60 @@ function initializeCropTool() {
     updateOriginalImgDisplay();
 }
 
+function applyWhiteBalanceAndContrastToImageData(imageData, gain, contrast) {
+    // contrast: 1.0=元のまま, <1.0=低, >1.0=高
+    // コントラスト調整式: 新値 = (元値-128)*contrast+128
+    for (let i = 0; i < imageData.data.length; i += 4) {
+        for (let c = 0; c < 3; c++) {
+            let v = imageData.data[i + c] * gain;
+            v = (v - 128) * contrast + 128;
+            imageData.data[i + c] = Math.max(0, Math.min(255, v));
+        }
+    }
+    return imageData;
+}
+
 function updateOriginalImgDisplay() {
     const originalImgCtx = originalImg.getContext('2d');
     const canvasWidth = originalImg.width;
     const canvasHeight = originalImg.height;
-    
     // Maintain aspect ratio of the crop area
     const cropRatio = cropArea.width / cropArea.height;
     let displayWidth, displayHeight;
-    
     if (cropRatio > 1) {
-        // Landscape orientation
         displayWidth = canvasWidth;
         displayHeight = canvasWidth / cropRatio;
     } else {
-        // Portrait or square orientation
         displayHeight = canvasHeight;
         displayWidth = canvasHeight * cropRatio;
     }
-    
-    // Center the image in the canvas
     const offsetX = (canvasWidth - displayWidth) / 2;
     const offsetY = (canvasHeight - displayHeight) / 2;
-    
     originalImgCtx.clearRect(0, 0, canvasWidth, canvasHeight);
-    originalImgCtx.drawImage(
-        originalImage, 
-        cropArea.x, 
-        cropArea.y, 
-        cropArea.width, 
+    // --- White balance & contrast preview ---
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = displayWidth;
+    tempCanvas.height = displayHeight;
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCtx.drawImage(
+        originalImage,
+        cropArea.x,
+        cropArea.y,
+        cropArea.width,
         cropArea.height,
-        offsetX,
-        offsetY,
+        0,
+        0,
         displayWidth,
         displayHeight
     );
+    let tempImageData = tempCtx.getImageData(0, 0, displayWidth, displayHeight);
+    tempImageData = applyWhiteBalanceAndContrastToImageData(
+        tempImageData,
+        parseFloat(wbAll.value),
+        parseFloat(contrast.value)
+    );
+    tempCtx.putImageData(tempImageData, 0, 0);
+    originalImgCtx.drawImage(tempCanvas, 0, 0);
 }
 
 async function convertImage() {
@@ -449,18 +485,23 @@ async function convertImage() {
     await new Promise(resolve => setTimeout(resolve, 100));
 
     // 画像データを取得
-    const imageData = tempCtx.getImageData(0, 0, width, height);
-
+    let imageData = tempCtx.getImageData(0, 0, width, height);
+    // --- Apply white balance & contrast before alpha fix ---
+    imageData = applyWhiteBalanceAndContrastToImageData(
+        imageData,
+        parseFloat(wbAll.value),
+        parseFloat(contrast.value)
+    );
     // 透過部分を白で塗りつぶし、アルファ値を255に
     for (let i = 0; i < imageData.data.length; i += 4) {
         if (imageData.data[i + 3] < 255) {
-            var alpha = imageData.data[i + 3] / 255; // アルファ値を0-1の範囲に変換;
-            imageData.data[i] = imageData.data[i] * alpha + 255 * (1 - alpha);     // R
-            imageData.data[i + 1] = imageData.data[i + 1] * alpha + 255 * (1 - alpha); // G
-            imageData.data[i + 2] = imageData.data[i + 2] * alpha + 255 * (1 - alpha); // B
-            imageData.data[i + 3] = 255; // A
+            var alpha = imageData.data[i + 3] / 255;
+            imageData.data[i] = imageData.data[i] * alpha + 255 * (1 - alpha);
+            imageData.data[i + 1] = imageData.data[i + 1] * alpha + 255 * (1 - alpha);
+            imageData.data[i + 2] = imageData.data[i + 2] * alpha + 255 * (1 - alpha);
+            imageData.data[i + 3] = 255;
         } else {
-            imageData.data[i + 3] = 255; // 強制的に不透明化
+            imageData.data[i + 3] = 255;
         }
     }
 
